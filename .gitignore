@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+/.instantnginx/
+/.pnpm/
+
+# Environment variables
+.env*
+.local*
+
+# Logs
+logs/
+*.log
+
+# Runtime directories
+/.cache/
+/temp/
+
+# Mobile
+.mobile/
+/ExpoDevClient/
+/android/app/build/
+/android/.gradle/
+/android/app/.expogroup/
+
+# Backend
+backend/target/
+backend/*.pid
+backend/*.hmc
+backend/**.gitkeep
+
+# Database
+*.odb
+*.iloc
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+__MACOSX
+
+# Initial project files that are skeletons
+!.gitignore
+!.editorconfig

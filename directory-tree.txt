@@ -1,0 +1,19 @@
+automovilismo-app/
+├── .gitignore          # Created - exclusions Java/Gradle/Node/Expo/Android
+├── .editorconfig       # Created - formato 4 espacios, UTF-8
+├── AGENTS.md           # Created - instrucciones para agentes
+├── MEMORY.md           # Created - continuidad del proyecto
+├── README.md           # Created - documentación completa
+├── backend/            # Created - vacío, para Spring Boot
+│   └── (por poblar)
+├── mobile/             # Created - vacío, para React Native + Expo
+│   └── (por poblar)
+├── data/               # Created
+│   ├── samples/        # Por crear - archivos JSON/CSV de muestra
+│   └── schemas/        # Por crear - esquemas TypeScript
+├── docs/               # Created
+│   ├── architecture.md # Por crear
+│   ├── roadmap.md      # Por crear
+│   ├── data-sources.md # Por crear
+│   └── decisions/      # Por crear
+└── infra/              # Created - vacío, Docker/configs

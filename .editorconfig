@@ -1,0 +1,21 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+root_markdown = true
+root_markdown_style = fatie
+
+[*.md]
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{java,kotlin,js,ts,json,yml,yaml,yml,yaml}]
+indent_size = 4
+
+[*.{xml,properties}]
+indent_size = 4
+indent_style = space
