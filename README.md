@@ -1,259 +1,91 @@
 # automovilismo-app
 
-Aplicación móvil Android dedicada al automovilismo argentino, permitiendo consultar información de categorías, pilotos, circuitos, eventos y resultados históricos.
+Aplicación móvil Android para consultar información del automovilismo argentino, con foco inicial en Turismo Carretera (TC). El proyecto prevé una aplicación React Native con Expo y TypeScript, y una API Python con FastAPI.
 
-## Descripción del problema
+## Objetivo del MVP
 
-El automovilismo argentino, particularmente el Turismo Carretera, tiene una rica historia y una base de fanáticos apasionados. Sin embargo, no existe una aplicación móvil moderna y oficial que consolide la información histórica y actual de las categorías argentinas en un solo lugar accesible desde dispositivos móviles.
-
-## Objetivos del MVP
-
-- Permitir consultar el calendario de eventos de Turismo Carretera.
-- Mostrar cronogramas de entrenamientos, clasificaciones, series y finales.
-- Proporcionar información de circuitos argentinos.
-- Listar y mostrar fichas de pilotos.
-- Mostrar información de equipos y participaciones por temporada.
-- Consultar resultados históricos y clasificaciones finales.
-- Distinguir entre resultados provisionales y oficiales.
+- Consultar el calendario y los cronogramas de los eventos.
+- Ver circuitos, pilotos, equipos y participaciones por temporada.
+- Consultar resultados históricos y distinguir los provisionales de los oficiales.
 - Guardar pilotos favoritos localmente en el dispositivo.
 
-## Funcionalidades incluidas (MVP)
+Quedan fuera del alcance inicial el cronometraje en tiempo real, las cuentas de usuario, la sincronización entre dispositivos, las notificaciones push, los mapas interactivos, las noticias y los videos.
 
-- Calendario de eventos.
-- Cronogramas de sesiones (entrenamiento, clasificación, series, final).
-- Fichas de circuitos.
-- Listado de pilotos con fichas individuales.
-- Información de equipos y participaciones estacionales.
-- Resultados históricos por temporada.
-- Distinción provisional/oficial en resultados.
-- Pilotos favoritos (localStorage/AsyncStorage).
-
-## Funcionalidades excluidas (fuera del alcance inicial)
-
-- Cronometraje en tiempo real.
-- Cuentas de usuario y sincronización entre dispositivos.
-- Notificaciones push.
-- Mapas interactivos de circuitos.
-- Noticias y reproducción de videos.
-
-## Tecnologías previstas
+## Stack previsto
 
 ### Aplicación móvil
-- **React Native** con **Expo** (SDK 51+)
-- **TypeScript** para tipado estático
-- **Expo Router** para navegación basada en archivos
-- **fetch** para peticiones HTTP al backend
-- **AsyncStorage** (Expo) para persistencia de favoritos
 
-### Backend
-- **Python** 3.11+ con **FastAPI**
-- **Pydantic** para validación de datos y esquemas
-- **SQLAlchemy 2.x** para acceso a PostgreSQL
-- **Alembic** para migraciones de base de datos
-- **PostgreSQL** como base de datos
-- **OpenAPI** generación automática desde los esquemas de Pydantic
-- **Ruff** para análisis estático, linting y formato
+- React Native, Expo y TypeScript.
+- Expo Router para navegación.
+- `fetch` para consumir la API REST.
+- AsyncStorage para favoritos locales.
+- Jest y React Native Testing Library para pruebas.
 
-### Infraestructura
-- **Git y GitHub** para control de versiones
-- **Docker** para facilitar ejecución reproducible de servicios
-- **Docker Compose** para orquestar backend + PostgreSQL
-- **GitHub Actions** para CI/CD y automatización de pruebas
+La versión de Expo todavía no está fijada.
 
-## Diagrama de arquitectura
+### Backend y datos
+
+- Python 3.11 o superior y FastAPI.
+- Pydantic para validación y esquemas.
+- SQLAlchemy 2.x y Alembic para PostgreSQL.
+- pytest para pruebas y Ruff para linting/formato.
+- PostgreSQL como base de datos.
+
+La API generará documentación OpenAPI desde FastAPI/Pydantic. El móvil no accederá directamente a la base de datos.
+
+### Infraestructura prevista
+
+Docker Compose para el entorno local es una propuesta del plan; todavía no hay configuración de Compose ni pipeline de CI en el repositorio.
+
+## Arquitectura prevista
 
 ```mermaid
 graph TD
     subgraph Mobile [Aplicación React Native]
-        UI[Interfaz de Usuario]
-        Storage[AsyncStorage - Favoritos]
+        UI[Interfaz de usuario]
+        Storage[AsyncStorage - favoritos]
         API[fetch - API REST]
     end
 
-    subgraph Backend [Spring Boot API]
-        Controller[Controladores REST]
-        Service[Servicios de dominio]
-        Repository[Repositorios JPA]
+    subgraph Backend [API FastAPI]
+        Endpoints[Endpoints REST]
+        Domain[Lógica de dominio]
+        Repositories[Repositorios SQLAlchemy]
         DB[(PostgreSQL)]
     end
 
     UI --> API
-    API --> Controller
-    Controller --> Service
-    Service --> Repository
-    Repository --> DB
-    DB --> Service
+    API --> Endpoints
+    Endpoints --> Domain
+    Domain --> Repositories
+    Repositories --> DB
 ```
 
-## Estructura del repositorio
+Este diagrama representa el diseño previsto, no componentes implementados.
 
-```
-automovilismo-app/
-├── .gitignore
-├── .editorconfig
-├── AGENTS.md
-├── MEMORY.md
-├── README.md
-├── docs/
-│   ├── architecture.md
-│   ├── roadmap.md
-│   ├── data-sources.md
-│   └── decisions/
-├── data/
-│   ├── samples/
-│   └── schemas/
-├── infra/
-├── mobile/
-│   ├── src/
-│   ├── app.json
-│   ├── app.config.js
-│   ├── package.json
-│   └── ...
-├── backend/
-│   ├── src/main/java/com/automovilismo/
-│   │   └── ...
-│   ├── src/main/resources/
-│   │   ├── application.yml
-│   │   └── db/
-│   │       └── migration/
-│   └── ...
-└── ...
-```
+## Estado del repositorio
 
-## Requisitos previos de instalación
+Actualmente el repositorio contiene documentación y estructura inicial. `backend/`, `mobile/`, `data/` e `infra/` todavía no tienen una implementación funcional; no hay API, aplicación móvil, base de datos, migraciones, muestras de datos, pruebas ni configuración de Docker Compose.
 
-- Node.js 20+ y npm/yarn
-- **Python 3.11+**
-- **uv** (gestor de dependencias y proyectos, recomendado)
-- PostgreSQL 15+
-- **Docker y Docker Compose** (recomendado para desarrollo)
-- Android Studio (para desarrollo móvil)
-- Expo CLI (`npm install -g expo-cli`)
-- Git
+Por ese motivo, aún no hay comandos de instalación, ejecución o pruebas del proyecto que puedan considerarse verificados. Los comandos previstos se documentarán cuando se inicialicen los componentes correspondientes.
 
-## Configuración y ejecución
+## Datos y procedencia
 
-### Backend
+Los datos deportivos deben ser verificables y tener su fuente documentada. No se debe inventar información ni automatizar su extracción sin comprobar antes las condiciones de reutilización. El plan prevé cargar datos manualmente desde archivos JSON; cualquier dato ficticio debe estar claramente identificado y no confundirse con datos reales.
 
-```bash
-# 1. Iniciar PostgreSQL y el backend con Docker Compose
-docker compose up -d db api
+## Documentación del proyecto
 
-# 2. Aplicar migraciones Alembic
-cd backend
-./backend/alembic upgrade head
+- [Constitución](docs/constitution.md): principios y restricciones.
+- [Plan técnico del MVP](docs/specs/mvp/plan.md): alcance técnico, fases y decisiones.
+- [Organización de especificaciones](docs/specs/mvp/README.md): flujo para crear y revisar specs.
+- `MEMORY.md`: estado de continuidad del proyecto.
 
-# 3. Ejecutar la aplicación
-cd backend
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
-```
+La estructura actual se puede consultar en [directory-tree.txt](directory-tree.txt). El plan técnico del MVP es la fuente de referencia para las fases; no hay un `docs/roadmap.md` separado.
 
-La API estará disponible en `http://localhost:8080`
+## Licencias
 
-### Mobile
-
-```bash
-# 1. Instalar dependencias
-cd mobile
-npm install
-
-# 2. Iniciar la aplicación
-npx expo start
-```
-
-Escaneá el código QR con el aplicativo Expo Go en tu dispositivo Android, o usa el emulador de Android Studio.
-
-### Estado actual
-
-- [ ] Estructura de proyecto inicial creada
-- [ ] Backend Spring Boot sin implementar
-- [ ] Aplicación móvil React Native sin implementar
-- [ ] Base de datos PostgreSQL sin configurar
-- [ ] Carga de datos históricos pendiente
-
-## Estrategia de pruebas
-
-### Backend
-- JUnit 5 tests para servicios y controladores
-- Mockito para mocking de repositorios
-- Testcontainers para pruebas de integración con base de datos real
-- Cobertura mínima del 80% para lógica de negocio
-
-### Mobile
-- Tests unitarios con Jest
-- Tests de integración con React Native Testing Library
-- Testing de componentes de interfaz y navegación
-
-## Gestión de datos históricos y fuentes
-
-Los datos se incorporarán manualmente mediante archivos estructurados (CSV/JSON). Se priorizarán fuentes oficiales:
-
-- **Turismo Carretera**: Datos oficiales del TPTC (Turismo Carretera Oficial)
-- **Fechas y resultados**: Verificación de múltiples fuentes antes de considerar datos como definitivos
-- **Datos ficticios**: Identificados claramente con etiqueta `ficticio` en archivos JSON
-
-Ningún dato se obtendrá mediante scraping sin verificar las condiciones de reutilización. Los archivos de datos de muestra estarán en `data/samples/` con sus esquemas correspondientes en `data/schemas/`.
-
-## Convenciones de Git
-
-- **Ramificación**: Flujo standard GitFlow
-  - `main`: Producciones estable, siempre desplegable
-  - `dev`: Línea de desarrollo actual
-  - `feature/*`: Nuevas funcionalidades (derivadas de `dev`)
-  - `release/*`: Preparación de releases
-  - `hotfix/*`: Correcciones urgentes (sobre `main`)
-
-- **Mensajes de commit**: Formato Conventional Commits
-  - `feat: ...` para nuevas funcionalidades
-  - `fix: ...` para correcciones de bugs
-  - `docs: ...` para cambios en documentación
-  - `style: ...` para formateo, puntos comas, etc (no afecta comportamiento)
-  - `refactor: ...` para refactoring que no es bug fix ni feature
-  - `test: ...` para agregar tests faltantes
-  - `chore: ...` para tareas de mantenimiento
-
-- **Etiquetas**: `v1.0.0`, `v1.1.0`, `v2.0.0` para releases
-
-## Roadmap de desarrollo
-
-### Fase 1: Estructura inicial (actual)
-- [x] Crear estructura de repositorio y documentación base
-- [ ] Inicializar proyectos mobile y backend con Python + FastAPI
-- [ ] Configurar PostgreSQL y Alembic
-- [ ] Primera migración Alembic (base)
-- [ ] Definir modelos de dominio y DTOs (con SQLAlchemy/Pydantic)
-
-### Fase 2: API básica y datos estáticos
-- [ ] Implementar endpoints de categorías y temporadas
-- [ ] Cargar datos históricos de Turismo Carretera desde archivos JSON
-- [ ] Implementar pantalla de calendario en mobile
-- [ ] Pantalla de listado de pilotos
-
-### Fase 3: Funcionalidades detalladas
-- [ ] Cronogramas por evento (sesiones completas)
-- [ ] Fichas de pilotos y equipos
-- [ ] Resultados y clasificaciones finales
-- [ ] Sistema de favoritos local
-
-### Fase 4: Refactor y escalabilidad
-- [ ] Arquitectura modular por dominios
-- [ ] Fácil incorporación de nuevas categorías
-- [ ] Optimización de queries y rendimiento
-
-## Limitaciones conocidas
-
-- Los datos iniciales serán estáticos (archivos JSON) hasta que se desarrolle el backend completo
-- Sin integración con APIs externas de terceros sin verificación de condiciones
-- Sin autenticación de usuarios en el MVP
-- Sin persistencia en la nube para favoritos (solo local dispositivo)
-- La navegación está pensada para ser lineal; aún no se han implementado pantallas profundas
-
-## Licencias y atribución de datos
-
-- Datos de Turismo Carretera: Se usarán datos verificables de fuentes oficiales cuando estén disponibles. Los datos de muestra identificados como `ficticios` no tienen restricciones de uso.
-- Documentación y código: MIT License (o definir al momento del proyecto)
-- Cualquier dato de terceros usado en `data/samples/` tendrá atribución correspondiente en su archivo respectivo.
+La licencia del código y la documentación todavía no está definida. Los datos de terceros que se incorporen deberán incluir atribución y respetar sus condiciones de uso.
 
 ---
 
-**Última actualización**: 16 de octubre de 2026
+**Última actualización:** 20 de octubre de 2026.

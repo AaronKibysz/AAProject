@@ -19,12 +19,12 @@ docs/specs/
 
 ## Cómo identificar la spec activa
 
-La spec activa es aquella cuya funcionalidad está siendo desarrollada o fue aprobada últimamente. Reglas:
+El plan técnico vigente del MVP es `plan.md`. Una spec funcional solo se considera activa si existe en una carpeta propia y fue aprobada. Reglas:
 
-1. Revisar `docs/roadmap.md` para el plan actual
+1. Revisar `plan.md` para las fases y el contexto técnico
 2. Revisar `MEMORY.md` para el estado más reciente
-3. El último spec.md modificado o creado suele ser el activo
-4. Preguntar al usuario si hay duda
+3. Identificar la spec aprobada que corresponda a la tarea
+4. Preguntar al usuario si no hay spec o existe duda sobre cuál está activa
 
 ## Cómo utilizar los archivos de cada spec
 
@@ -48,7 +48,7 @@ La spec activa es aquella cuya funcionalidad está siendo desarrollada o fue apr
 
 1. Usuario propone una funcionalidad
 2. Crear nueva carpeta bajo `specs/` con número incremental
-3. `plan.md` ya existente sirve de contexto general
+3. `mvp/plan.md` sirve de contexto técnico general
 4. Crear `spec.md` con la funcionalidad detallada
 5. Revisar y aprobar la spec
 6. Generar `tasks.md` con el desglose

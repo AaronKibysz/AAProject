@@ -36,14 +36,14 @@ No declarar una tarea terminada si las pruebas relevantes fallan. No ocultar fal
 
 Si no es posible ejecutar una prueba, documentar el motivo y distinguirlo de una prueba aprobada.
 
-**Python específico**: Usar `pytest` como framework de tests. Escribir tests functions puros cuando sea posible. Utilizar fixtures para configurar la base de datos de prueba. Marcar tests lentejos con `@pytest.mark.slow` y ejecutarlos por separado. Verificar coverage con `ruff check` y reportes de cobertura.
+**Python específico**: Usar `pytest` como framework de tests. Escribir funciones de prueba puras cuando sea posible y utilizar fixtures para configurar la base de datos de prueba. Marcar las pruebas lentas con `@pytest.mark.slow` y ejecutarlas por separado. Usar Ruff para linting y formato; medir la cobertura con una herramienta de cobertura configurada para el proyecto.
 
 ## 5. Integridad y procedencia de los datos
 
 - No inventar resultados, fechas, pilotos, equipos ni estadísticas reales.
 - Distinguir los datos reales verificados de los datos de prueba.
 - Registrar la procedencia de los datos deportivos cuando corresponda.
-- Differenciar resultados provisionales, oficiales, incompletos y no disponibles.
+- Diferenciar resultados provisionales, oficiales, incompletos y no disponibles.
 - No asumir que un dato publicado puede reutilizarse libremente.
 - Verificar las condiciones de uso antes de automatizar la extracción de datos.
 

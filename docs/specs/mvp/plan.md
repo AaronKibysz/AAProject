@@ -54,9 +54,10 @@ mobile/
 └── components/        # Componentes reutilizables
 docs/
 ├── constitution.md    # Principios innegociables
-├── architecture.md    # Diagrama y decisiones técnicas
-├── roadmap.md         # Plan de desarrollo por fases
-└── data-sources.md    # Fuentes y procedencia de datos
+└── specs/
+    └── mvp/
+        ├── README.md
+        └── plan.md     # Este plan; las otras guías aún no existen
 data/
 ├── samples/           # Archivos JSON/CSV de muestra
 └── schemas/           # Esquemas TypeScript
@@ -77,7 +78,7 @@ data/
 - **Circuito**: Nombre, ubicación, características
 - **Evento**: Instancia de una carrera (festival TC)
 - **Sesión**: Entrenamiento, clasificación, series, final
-- **Piloto**: Nombre, número, equipo, datos biograficos
+- **Piloto**: Nombre, número, equipo y datos biográficos
 - **Equipo**: Nombre, representación, datos del equipo
 - **Participación**: Piloto + equipo + temporada + resultados
 - **Resultado**: Posición, tiempo, provisional/oficial
@@ -101,26 +102,22 @@ data/
 - Se priorizarán fuentes oficiales (TPTC, ACA, ACTC)
 - Los datos ficticios deben identificarse claramente con metadatos
 - Verificar condiciones de reutilización antes de automatizar extracciones
-- Documentar la fuente en `docs/data-sources.md` cuando se añada un nuevo lote
+- Documentar la fuente cuando se añada un nuevo lote; `docs/data-sources.md` está previsto, pero aún no existe
 
-## Configuración local y despliegue previsto
+## Configuración local prevista
 
-### Backend
+Los siguientes comandos son objetivos de configuración, no están verificados: todavía no hay proyectos inicializados, dependencias instaladas ni conexión configurada. Tampoco existe un archivo de Docker Compose; los servicios que incluiría siguen pendientes de definición.
 
 ```bash
-# Iniciar PostgreSQL (Docker)
-docker compose up -d db
-
-# Aplicar migraciones Alembic
+# Una vez inicializado el backend y configurada la conexión a PostgreSQL:
 cd backend
- alembic upgrade head
-
-# Ejecutar aplicación
-cd backend
+alembic upgrade head
 python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
 ```
 
 ### Mobile
+
+Comandos objetivo una vez inicializada la aplicación:
 
 ```bash
 cd mobile
@@ -163,16 +160,15 @@ npx expo start
 - Sin: microservicios, Kubernetes, Redis, autenticación, tiempo real
 
 ### Propuestas
-- OpenAPI primero: generar docs desde las entidades (automático con FastAPI/Pydantic)
 - Convención: endpoints bajo `/api/` con versión semántica
 - Datos de muestra: identificadores `ficticio` en metadatos
 
 ### Pendientes
 - Versiones exactas de dependencias (compatibilidad Python 3.11+ + FastAPI + SQLAlchemy 2.x + Alembic)
 - Estructura de módulos Python final (domain vs application vs interface)
-- Formato datos de muestra: JSON estructurado vs CSV
-- Generación OpenAPI: configuración manual vs automática (FastAPI automática)
+- Esquema concreto de los archivos JSON de muestra
 - Variables de entorno `.env` formatos exactos
 - Docker Compose: servicios exactos (backend+db vs full stack)
 - Navegación Expo Router: rutas anidadas vs planas
 - TypeScript strictness: `strict: true` en tsconfig
+- Creación de documentación dedicada de arquitectura y fuentes de datos

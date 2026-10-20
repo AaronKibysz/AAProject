@@ -10,91 +10,38 @@ Guía operativa para agentes de programación que trabajen en este repositorio. 
 
 El objetivo es proporcionar una aplicación de calidad portfolio, mantenible, bien documentada y arquitectónicamente sólida.
 
-## Estructura del repositorio
+## Estructura actual y prevista
 
+```text
 automovilismo-app/
 ├── .gitignore
 ├── .editorconfig
 ├── AGENTS.md
 ├── MEMORY.md
 ├── README.md
+├── directory-tree.txt
 ├── docs/
 │   ├── constitution.md
-│   ├── architecture.md
-│   ├── roadmap.md
-│   ├── data-sources.md
-│   └── decisions/
+│   ├── decisions/
+│   └── specs/
+│       └── mvp/
+│           ├── README.md
+│           └── plan.md
+├── skills/
+│   └── spec-generator/
 ├── data/
 │   ├── samples/
 │   └── schemas/
 ├── infra/
-├── mobile/          # React Native + Expo + TypeScript
-└── backend/         # Python + FastAPI + SQLAlchemy + PostgreSQL
-
-## Comandos verificados
-
-### Backend (Python + FastAPI)
-
-```bash
-# Verificar versión Python
-python3 --version
-
-# Compilar (verificar sintaxis)
-python3 -m py_compile backend/app/main.py
-
-# Ejecutar
-cd backend
-python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
-
-# Aplicar migraciones Alembic
-cd backend
- alembic upgrade head
-
-# Verificar estado de migraciones
-cd backend
- alembic current
-
-# Ejecutar tests (pytest)
-cd backend
-python3 -m pytest
-
-# Generar documentación OpenAPI
-cd backend
-python3 -m fastapi generate openapi --output openapi.json
+├── mobile/
+└── backend/
 ```
 
-### Mobile (React Native + Expo)
+Las carpetas `backend/`, `mobile/`, `data/` e `infra/` todavía no contienen una implementación funcional. La estructura de módulos descrita en el plan del MVP es prevista, no una descripción de archivos existentes.
 
-```bash
-# Instalar dependencias
-cd mobile
-npm install
+## Validación
 
-# Iniciar aplicación
-npx expo start
-
-# Ejecutar tests
-npx jest
-
-# Build Android
-npx expo run:android
-
-# Build iOS (macOS)
-npx expo run:ios
-```
-
-### Scripts del repositorio
-
-```bash
-# Verificar estructura
-ls -la
-
-# Estado Git
-git status
-
-# Ver tree profundo
-find . -type f -not -path "*/\.git/*" -not -path "*target/*" -not -path "*node_modules/*" | sort
-```
+Todavía no hay comandos de build o pruebas del proyecto que puedan ejecutarse. No presentar comandos previstos en el plan como verificados; documentarlos aquí cuando existan los proyectos y se hayan ejecutado.
 
 ## Estilo
 
@@ -102,13 +49,13 @@ find . -type f -not -path "*/\.git/*" -not -path "*target/*" -not -path "*node_m
 - **Validaciones explícitas** y manejo de errores con Pydantic
 - **Pruebas automatizadas** para la lógica relevante
 - **Código e identificadores en inglés**
-- **Documentación en español** (constitución, specs, roadmap)
+- **Documentación en español** (constitución, specs y plan técnico)
 - **Nombres descriptivos** y convenciones coherentes en todo el repositorio
 
 ## Reglas de trabajo
 
 - **Leer `docs/constitution.md`** antes de comenzar una tarea relevante
-- **Consultar la spec activa** y el plan técnico correspondiente
+- **Consultar la spec activa**, si existe, y el plan técnico en `docs/specs/mvp/plan.md`
 - **No modificar funcionalidades** fuera del alcance aprobado
 - **No modificar specs aprobadas** sin autorización explícita
 - **No agregar dependencias** sin justificar su necesidad
