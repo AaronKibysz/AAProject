@@ -1,0 +1,32 @@
+{
+  "id": 1,
+  "name": "Autódromo Roberto Mouras",
+  "location": "La Plata, Buenos Aires",
+  "length_km": 4.250,
+  "is_ficticio": false,
+  "source": "Oficial ACTC",
+  "data_generated": "2024-01-15T00:00:00Z",
+  "notes": "Sede de la mayoría de las fechas del TC"
+}
+
+{
+  "id": 2,
+  "name": "Autódromo Juan y Oscar Gálvez",
+  "location": "Buenos Aires, Capital Federal",
+  "length_km": 4.250,
+  "is_ficticio": false,
+  "source": "Oficial ACTC",
+  "data_generated": "2024-01-15T00:00:00Z",
+  "notes": "El circuito más histórico del automovilismo argentino"
+}
+
+{
+  "id": 3,
+  "name": "Autódromo Néstor Patriarca",
+  "location": "Rosario, Santa Fe",
+  "length_km": 3.750,
+  "is_ficticio": true,
+  "source": "Proyecto de ampliación",
+  "data_generated": "2024-06-01T00:00:00Z",
+  "notes": "Circuito propuesto en planes futuros, dato ficticio"
+}

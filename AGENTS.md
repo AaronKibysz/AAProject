@@ -1,6 +1,13 @@
 # AGENTS.md — Aplicación de automovilismo argentino
 
-Guía operativa para agentes de programación que trabajen en este repositorio. Léala antes de comenzar cualquier tarea y guárdela actualizada después de cambios significativos.
+Guía operativa para agentes de programación que trabajen en este repositorio. Léela antes de comenzar cualquier tarea y guárdela actualizada después de cambios significativos.
+
+## Instrucciones de Git
+
+- **No implementar transacciones Git en esta sesión**: Ni `git add`, `git commit`, `git push`, `git pull` ni `git merge` forman parte de las tareas de adaptación tecnológica o implementación de funcionalidades.
+- **Git para la sesión siguiente**: Las operaciones de Git (commits, pushes, merges) se realizarán al final de cada sesión de trabajo, previa revisión de los archivos modificados y confirmación del usuario.
+- **Propósito**: Mantener el enfoque en la adaptación técnica y documentación, evitando operaciones de repositorio que puedan interrumpir el flujo de trabajo técnico.
+- **Confirmación final**: Al terminar cualquier tarea, se informarán los cambios realizados y el usuario o agente decidirá si ejecutar las operaciones de Git correspondientes.
 
 ## Proyecto
 
@@ -49,7 +56,7 @@ Todavía no hay comandos de build o pruebas del proyecto que puedan ejecutarse. 
 - **Validaciones explícitas** y manejo de errores con Pydantic
 - **Pruebas automatizadas** para la lógica relevante
 - **Código e identificadores en inglés**
-- **Documentación en español** (constitución, specs y plan técnico)
+- **Documentación en español** (constitución, specs, roadmap)
 - **Nombres descriptivos** y convenciones coherentes en todo el repositorio
 
 ## Reglas de trabajo
@@ -71,3 +78,10 @@ Todavía no hay comandos de build o pruebas del proyecto que puedan ejecutarse. 
 3. Comprobar el cumplimiento de la spec y de la constitución
 4. Actualizar `tasks.md` y `MEMORY.md` cuando corresponda
 5. Informar los cambios, las pruebas ejecutadas, sus resultados y los problemas pendientes
+
+## Instrucciones de Git
+
+- **No implementar transacciones Git en esta sesión**: Ni `git add`, `git commit`, `git push`, `git pull` ni `git merge` forman parte de las tareas de adaptación tecnológica o implementación de funcionalidades.
+- **Git para la sesión siguiente**: Las operaciones de Git (commits, pushes, merges) se realizarán al final de cada sesión de trabajo, previa revisión de los archivos modificados y confirmación del usuario.
+- **Propósito**: Mantener el enfoque en la adaptación técnica y documentación, evitando operaciones de repositorio que puedan interrumpir el flujo de trabajo técnico.
+- **Confirmación final**: Al terminar cualquier tarea, se informarán los cambios realizados y el usuario o agente decidirá si ejecutar las operaciones de Git correspondientes.

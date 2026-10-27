@@ -1,0 +1,32 @@
+{
+  "id": 1,
+  "name": "Juan María Traverso",
+  "number": 3,
+  "category_id": 1,
+  "is_ficticio": false,
+  "source": "Oficial TPTC 2024",
+  "data_generated": "2024-01-15T00:00:00Z",
+  "notes": "Piloto experimentado, múltiples victorias en TC"
+}
+
+{
+  "id": 2,
+  "name": "Facundo Ardusso",
+  "number": 11,
+  "category_id": 1,
+  "is_ficticio": false,
+  "source": "Oficial TPTC 2024",
+  "data_generated": "2024-01-15T00:00:00Z",
+  "notes": "Campeón en múltiples temporadas del TC"
+}
+
+{
+  "id": 3,
+  "name": "Piloto Ficticio Prueba",
+  "number": 99,
+  "category_id": 1,
+  "is_ficticio": true,
+  "source": "Datos de prueba",
+  "data_generated": "2024-06-01T00:00:00Z",
+  "notes": "Identificado como ficticio para testing y desarrollo"
+}

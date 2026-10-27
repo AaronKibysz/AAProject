@@ -1,0 +1,32 @@
+{
+  "id": 1,
+  "name": "Turismo Carretera",
+  "description": "Categoría principal del automovilismo argentino, fundada en 1930.",
+  "is_ficticio": false,
+  "source": "Oficial TPTC 2024",
+  "data_generated": "2024-01-15T00:00:00Z",
+  "load_priority": "high",
+  "notes": "Datos actualizados al cierre de temporada 2024"
+}
+
+{
+  "id": 2,
+  "name": "TC Pista",
+  "description": "Categoría de desarrollo y preparación de pilotos del TC.",
+  "is_ficticio": false,
+  "source": "Oficial ACTC 2024",
+  "data_generated": "2024-01-15T00:00:00Z",
+  "load_priority": "high",
+  "notes": "Categoría de ascenso y formación de pilotos"
+}
+
+{
+  "id": 3,
+  "name": "TC 2000",
+  "description": "Categoría desaparecida (1963-2017) de autos de turismo.",
+  "is_ficticio": true,
+  "source": "Datos históricos compilados",
+  "data_generated": "2024-06-01T00:00:00Z",
+  "load_priority": "medium",
+  "notes": "Datos de época, identificados como ficticios para distinguir de categorías vigentes"
+}
