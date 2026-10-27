@@ -1,5 +1,4 @@
-// Pantalla de categorías
-// Muestra lista paginada de categorías
+// Pantalla de categorías con diseño racing
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -7,10 +6,10 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  ActivityIndicator,
   RefreshControl,
-  TouchableOpacity,
 } from 'react-native';
+import { colors, typography, spacing, borderRadius } from '../theme';
+import { Card, Loading, EmptyState, Badge } from '../components';
 import { apiService } from '../services/api';
 import { Category } from '../types';
 
@@ -56,19 +55,19 @@ export default function CategoriesScreen() {
   };
 
   const renderItem = ({ item }: { item: Category }) => (
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}>{item.name}</Text>
-      {item.description && <Text style={styles.cardDesc}>{item.description}</Text>}
-      {item.is_ficticio && <Text style={styles.ficticioBadge}>Muestra</Text>}
-    </View>
+    <Card style={styles.card}>
+      <View style={styles.cardRow}>
+        <View style={styles.cardInfo}>
+          <Text style={styles.cardTitle}>{item.name}</Text>
+          {item.description && <Text style={styles.cardDesc}>{item.description}</Text>}
+        </View>
+        {item.is_ficticio && <Badge text="Muestra" color={colors.warning} />}
+      </View>
+    </Card>
   );
 
   if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1976d2" />
-      </View>
-    );
+    return <Loading message="Cargando categorías..." />;
   }
 
   return (
@@ -79,12 +78,17 @@ export default function CategoriesScreen() {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
         }
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No hay categorías disponibles</Text>
+          <EmptyState title="Sin categorías" message="No hay categorías disponibles" icon="📋" />
         }
       />
     </View>
@@ -94,43 +98,30 @@ export default function CategoriesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: colors.background,
   },
   list: {
-    padding: 16,
+    padding: spacing.lg,
   },
   card: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    elevation: 2,
+    marginBottom: spacing.sm,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardInfo: {
+    flex: 1,
   },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: typography.lg,
+    fontWeight: typography.semibold,
+    color: colors.text,
   },
   cardDesc: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  ficticioBadge: {
-    fontSize: 12,
-    color: '#ff9800',
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 40,
-    fontSize: 16,
+    fontSize: typography.sm,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
 });

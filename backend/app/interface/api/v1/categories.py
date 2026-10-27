@@ -215,7 +215,7 @@ async def read_category(
 
 @router.put(
     "/{category_id}",
-    response_model=None,
+    response_model=CategoryRead,
     summary="Actualizar categoría",
     description="Actualizar los datos de una categoría existente.",
 )

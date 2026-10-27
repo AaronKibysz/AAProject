@@ -1,5 +1,5 @@
-// Pantalla de inicio
-// Muestra un resumen de la app y accesos rápidos
+// Pantalla de inicio - Live Tracking
+// Muestra las carreras en vivo y accesos rápidos
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -8,12 +8,13 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
 } from 'react-native';
+import { colors, typography, spacing, borderRadius } from '../theme';
+import { Card, LiveBadge, Badge, Loading, EmptyState } from '../components';
 import { apiService } from '../services/api';
 import { Category, Pilot, Circuit } from '../types';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }: any) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [pilots, setPilots] = useState<Pilot[]>([]);
   const [circuits, setCircuits] = useState<Circuit[]>([]);
@@ -41,48 +42,116 @@ export default function HomeScreen() {
   };
 
   if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1976d2" />
-      </View>
-    );
+    return <Loading message="Cargando datos..." />;
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Automovilismo Argentino</Text>
-        <Text style={styles.subtitle}>Turismo Carretera y más</Text>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.title}>🏁 Automovilismo</Text>
+            <Text style={styles.subtitle}>Turismo Carretera y más</Text>
+          </View>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => navigation.navigate('Search')}
+            >
+              <Text style={styles.headerButtonText}>🔍</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => navigation.navigate('Favorites')}
+            >
+              <Text style={styles.headerButtonText}>⭐</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
+      {/* Live Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Categorías ({categories.length})</Text>
-        {categories.map((cat) => (
-          <View key={cat.id} style={styles.card}>
-            <Text style={styles.cardTitle}>{cat.name}</Text>
-            {cat.description && <Text style={styles.cardDesc}>{cat.description}</Text>}
-          </View>
-        ))}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>🔴 En Vivo</Text>
+          <LiveBadge />
+        </View>
+        <Card style={styles.liveCard}>
+          <Text style={styles.liveCardTitle}>Próxima carrera</Text>
+          <Text style={styles.liveCardDesc}>
+            No hay carreras en vivo en este momento
+          </Text>
+          <Text style={styles.liveCardHint}>
+            Las carreras aparecerán aquí cuando estén en curso
+          </Text>
+        </Card>
       </View>
 
+      {/* Categorías */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Pilotos ({pilots.length})</Text>
-        {pilots.map((pilot) => (
-          <View key={pilot.id} style={styles.card}>
-            <Text style={styles.cardTitle}>{pilot.name}</Text>
-            {pilot.team && <Text style={styles.cardDesc}>{pilot.team}</Text>}
-          </View>
-        ))}
+        <Text style={styles.sectionTitle}>Categorías</Text>
+        {categories.length === 0 ? (
+          <EmptyState title="Sin categorías" message="No hay categorías disponibles" icon="📋" />
+        ) : (
+          categories.map((cat) => (
+            <Card key={cat.id} style={styles.itemCard}>
+              <View style={styles.itemRow}>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemTitle}>{cat.name}</Text>
+                  {cat.description && <Text style={styles.itemDesc}>{cat.description}</Text>}
+                </View>
+                {cat.is_ficticio && <Badge text="Muestra" color={colors.warning} />}
+              </View>
+            </Card>
+          ))
+        )}
       </View>
 
+      {/* Pilotos */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Circuitos ({circuits.length})</Text>
-        {circuits.map((circuit) => (
-          <View key={circuit.id} style={styles.card}>
-            <Text style={styles.cardTitle}>{circuit.name}</Text>
-            {circuit.location && <Text style={styles.cardDesc}>{circuit.location}</Text>}
-          </View>
-        ))}
+        <Text style={styles.sectionTitle}>Pilotos Destacados</Text>
+        {pilots.length === 0 ? (
+          <EmptyState title="Sin pilotos" message="No hay pilotos disponibles" icon="🏎️" />
+        ) : (
+          pilots.map((pilot) => (
+            <Card key={pilot.id} style={styles.itemCard}>
+              <View style={styles.itemRow}>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemTitle}>{pilot.name}</Text>
+                  {pilot.team && <Text style={styles.itemDesc}>{pilot.team}</Text>}
+                </View>
+                {pilot.number && (
+                  <View style={styles.numberBadge}>
+                    <Text style={styles.numberText}>#{pilot.number}</Text>
+                  </View>
+                )}
+              </View>
+            </Card>
+          ))
+        )}
+      </View>
+
+      {/* Circuitos */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Circuitos</Text>
+        {circuits.length === 0 ? (
+          <EmptyState title="Sin circuitos" message="No hay circuitos disponibles" icon="🏁" />
+        ) : (
+          circuits.map((circuit) => (
+            <Card key={circuit.id} style={styles.itemCard}>
+              <View style={styles.itemRow}>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemTitle}>{circuit.name}</Text>
+                  {circuit.location && <Text style={styles.itemDesc}>{circuit.location}</Text>}
+                </View>
+                {circuit.length_km && (
+                  <Badge text={`${circuit.length_km} km`} color={colors.info} />
+                )}
+              </View>
+            </Card>
+          ))
+        )}
       </View>
     </ScrollView>
   );
@@ -91,52 +160,117 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  content: {
+    paddingBottom: spacing.xxxl,
   },
   header: {
-    backgroundColor: '#1976d2',
-    padding: 20,
-    paddingTop: 40,
+    backgroundColor: colors.surface,
+    padding: spacing.xl,
+    paddingTop: spacing.xxxl,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  headerButtonText: {
+    fontSize: typography.lg,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
+    fontSize: typography.xxxl,
+    fontWeight: typography.black,
+    color: colors.text,
   },
   subtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-    marginTop: 4,
+    fontSize: typography.md,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
   section: {
-    padding: 16,
+    padding: spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
+    fontSize: typography.xl,
+    fontWeight: typography.bold,
+    color: colors.text,
   },
-  card: {
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    elevation: 2,
+  liveCard: {
+    borderLeftWidth: 3,
+    borderLeftColor: colors.live,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+  liveCardTitle: {
+    fontSize: typography.lg,
+    fontWeight: typography.semibold,
+    color: colors.text,
+    marginBottom: spacing.xs,
   },
-  cardDesc: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
+  liveCardDesc: {
+    fontSize: typography.md,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  },
+  liveCardHint: {
+    fontSize: typography.sm,
+    color: colors.textMuted,
+    fontStyle: 'italic',
+  },
+  itemCard: {
+    marginBottom: spacing.sm,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  itemInfo: {
+    flex: 1,
+  },
+  itemTitle: {
+    fontSize: typography.lg,
+    fontWeight: typography.semibold,
+    color: colors.text,
+  },
+  itemDesc: {
+    fontSize: typography.sm,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+  numberBadge: {
+    backgroundColor: colors.primary + '30',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  numberText: {
+    color: colors.primaryLight,
+    fontSize: typography.md,
+    fontWeight: typography.bold,
+    fontFamily: typography.mono,
   },
 });

@@ -15,6 +15,13 @@ export interface Pilot {
   number?: number;
   team?: string;
   category_id?: number;
+  biography?: string;
+  photo_url?: string;
+  birth_date?: string;
+  nationality?: string;
+  championships?: number;
+  wins?: number;
+  podiums?: number;
   is_ficticio: boolean;
   created_at?: string;
 }
@@ -25,6 +32,12 @@ export interface Circuit {
   location?: string;
   country?: string;
   length_km?: number;
+  turns?: number;
+  description?: string;
+  photo_url?: string;
+  record_lap?: string;
+  record_holder?: string;
+  capacity?: number;
   is_ficticio: boolean;
   created_at?: string;
 }
@@ -33,6 +46,7 @@ export interface Season {
   id: number;
   year: number;
   category_id: number;
+  is_active?: boolean;
   is_ficticio: boolean;
   created_at?: string;
 }

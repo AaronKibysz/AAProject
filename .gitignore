@@ -96,6 +96,47 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# Local tooling and editors
+.claude/
+mobile/.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.jks
+*.keystore
+secrets/
+
+# Local data, database dumps and backups
+*.dump
+*.sql.gz
+backend/data/local/
+*.bak
+*.tmp
+
+# Throwaway helper scripts and test output
+**/fix_*.py
+**/debug_*.py
+**/check_*.py
+**/create_*.py
+**/add_*.py
+**/test_results.txt
+**/test_write.ts
+
+# Build artifacts
+*.apk
+*.aab
+mobile/web-build/
+mobile/android/
+mobile/ios/
+
 # Initial project files that are skeletons
 !.gitignore
 !.editorconfig

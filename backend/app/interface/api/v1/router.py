@@ -25,6 +25,7 @@ from app.interface.api.v1.sessions import router as sessions_router
 from app.interface.api.v1.auth import router as auth_router
 from app.interface.api.v1.favorites import router as favorites_router
 from app.interface.api.v1.search import router as search_router
+from app.interface.api.v1.seed import router as seed_router
 
 router.include_router(categories_router, prefix="/categories")
 router.include_router(pilots_router, prefix="/pilots")

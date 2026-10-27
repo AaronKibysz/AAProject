@@ -1,5 +1,4 @@
-// Pantalla de perfil
-// Muestra datos del usuario y opciones de cuenta
+// Pantalla de perfil con dise帽o racing
 
 import React from 'react';
 import {
@@ -9,6 +8,8 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { colors, typography, spacing, borderRadius } from '../theme';
+import { Card, Button, Loading } from '../components';
 import { useAuth } from '../context/AuthContext';
 
 export default function ProfileScreen({ navigation }: any) {
@@ -22,21 +23,23 @@ export default function ProfileScreen({ navigation }: any) {
             <Text style={styles.avatarText}>?</Text>
           </View>
           <Text style={styles.name}>Invitado</Text>
-          <Text style={styles.email}>Inicia sesi髇 para acceder a tu perfil</Text>
+          <Text style={styles.email}>Inicia sesi贸n para acceder a tu perfil</Text>
         </View>
         <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.button}
+          <Button
+            title="Iniciar sesi贸n"
             onPress={() => navigation.getParent()?.navigate('Login')}
-          >
-            <Text style={styles.buttonText}>Iniciar sesi髇</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.buttonSecondary]}
+            variant="primary"
+            size="lg"
+            style={styles.button}
+          />
+          <Button
+            title="Registrarse"
             onPress={() => navigation.getParent()?.navigate('Register')}
-          >
-            <Text style={styles.buttonText}>Registrarse</Text>
-          </TouchableOpacity>
+            variant="secondary"
+            size="lg"
+            style={styles.button}
+          />
         </View>
       </View>
     );
@@ -76,10 +79,6 @@ export default function ProfileScreen({ navigation }: any) {
     ]);
   };
 
-  if (!user) {
-    return null;
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -93,33 +92,39 @@ export default function ProfileScreen({ navigation }: any) {
       </View>
 
       <View style={styles.section}>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Usuario</Text>
-          <Text style={styles.value}>{user.username}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Email</Text>
-          <Text style={styles.value}>{user.email}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Estado</Text>
-          <Text style={[styles.value, user.is_active ? styles.active : styles.inactive]}>
-            {user.is_active ? 'Activo' : 'Inactivo'}
-          </Text>
-        </View>
+        <Card style={styles.infoCard}>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Usuario</Text>
+            <Text style={styles.value}>{user.username}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Email</Text>
+            <Text style={styles.value}>{user.email}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Estado</Text>
+            <Text style={[styles.value, user.is_active ? styles.active : styles.inactive]}>
+              {user.is_active ? 'Activo' : 'Inactivo'}
+            </Text>
+          </View>
+        </Card>
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.button} onPress={handleLogout}>
-          <Text style={styles.buttonText}>Cerrar sesi贸n</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.buttonDanger]}
+        <Button
+          title="Cerrar sesi贸n"
+          onPress={handleLogout}
+          variant="primary"
+          size="lg"
+          style={styles.button}
+        />
+        <Button
+          title="Cerrar todas las sesiones"
           onPress={handleLogoutAll}
-        >
-          <Text style={styles.buttonText}>Cerrar todas las sesiones</Text>
-        </TouchableOpacity>
+          variant="danger"
+          size="lg"
+          style={styles.button}
+        />
       </View>
     </View>
   );
@@ -128,86 +133,75 @@ export default function ProfileScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#1976d2',
-    padding: 20,
-    paddingTop: 40,
+    backgroundColor: colors.surface,
+    padding: spacing.xl,
+    paddingTop: spacing.xxxl,
     alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: colors.primary + '40',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.md,
+    borderWidth: 2,
+    borderColor: colors.primary,
   },
   avatarText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: 'white',
+    fontSize: typography.xxxl,
+    fontWeight: typography.bold,
+    color: colors.primaryLight,
   },
   name: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
+    fontSize: typography.xxl,
+    fontWeight: typography.bold,
+    color: colors.text,
   },
   email: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-    marginTop: 4,
+    fontSize: typography.md,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
   section: {
-    backgroundColor: 'white',
-    margin: 16,
-    borderRadius: 8,
-    padding: 16,
-    elevation: 2,
+    padding: spacing.lg,
+  },
+  infoCard: {
+    padding: spacing.lg,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   label: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.md,
+    color: colors.textSecondary,
   },
   value: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
+    fontSize: typography.md,
+    fontWeight: typography.medium,
+    color: colors.text,
   },
   active: {
-    color: '#4caf50',
+    color: colors.success,
   },
   inactive: {
-    color: '#f44336',
+    color: colors.error,
   },
   actions: {
-    padding: 16,
+    padding: spacing.lg,
+    gap: spacing.sm,
   },
   button: {
-    backgroundColor: '#1976d2',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  buttonSecondary: {
-    backgroundColor: '#4caf50',
-  },
-  buttonDanger: {
-    backgroundColor: '#f44336',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    marginBottom: spacing.sm,
   },
 });

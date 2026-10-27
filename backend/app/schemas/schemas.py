@@ -120,6 +120,10 @@ class PilotCreate(BaseModel):
         max_length=50,
         description="Equipo o fabricante del piloto"
     )
+    number: Optional[int] = Field(
+        default=None,
+        description="Numero del piloto"
+    )
     is_ficticio: bool = Field(
         default=False,
         description="True = dato de muestra/ficticio, False = oficial verificado"
@@ -146,6 +150,13 @@ class PilotRead(PilotCreate):
     - is_oficial: Propiedad calculada desde el dominio
     """
     id: int
+    biography: Optional[str] = None
+    photo_url: Optional[str] = None
+    birth_date: Optional[str] = None
+    nationality: Optional[str] = None
+    championships: int = 0
+    wins: int = 0
+    podiums: int = 0
     created_at: str
     updated_at: str
     is_oficial: bool
@@ -203,6 +214,11 @@ class CircuitCreate(BaseModel):
         max_length=200,
         description="Ubicación del circuito"
     )
+    country: Optional[str] = Field(
+        default=None,
+        max_length=50,
+        description="Pais del circuito"
+    )
     is_ficticio: bool = Field(
         default=False,
         description="True = dato de muestra/ficticio, False = oficial verificado"
@@ -229,6 +245,13 @@ class CircuitRead(CircuitCreate):
     - is_oficial: Propiedad calculada desde el dominio
     """
     id: int
+    length_km: Optional[float] = None
+    turns: Optional[int] = None
+    description: Optional[str] = None
+    photo_url: Optional[str] = None
+    record_lap: Optional[str] = None
+    record_holder: Optional[str] = None
+    capacity: Optional[int] = None
     created_at: str
     updated_at: str
     is_oficial: bool

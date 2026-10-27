@@ -1,5 +1,4 @@
-// Pantalla de pilotos
-// Muestra lista paginada de pilotos
+// Pantalla de pilotos con diseño racing
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -7,13 +6,14 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+import { colors, typography, spacing, borderRadius } from '../theme';
+import { Card, Loading, EmptyState, Badge } from '../components';
 import { apiService } from '../services/api';
 import { Pilot } from '../types';
 
-export default function PilotsScreen() {
+export default function PilotsScreen({ navigation }: any) {
   const [pilots, setPilots] = useState<Pilot[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -55,22 +55,26 @@ export default function PilotsScreen() {
   };
 
   const renderItem = ({ item }: { item: Pilot }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>{item.name}</Text>
-        {item.number && <Text style={styles.number}>#{item.number}</Text>}
+    <Card style={styles.card} onPress={() => navigation.getParent()?.navigate('PilotDetail', { pilot: item })}>
+      <View style={styles.cardRow}>
+        <View style={styles.cardInfo}>
+          <Text style={styles.cardTitle}>{item.name}</Text>
+          {item.team && <Text style={styles.cardDesc}>{item.team}</Text>}
+        </View>
+        <View style={styles.rightSection}>
+          {item.number && (
+            <View style={styles.numberBadge}>
+              <Text style={styles.numberText}>#{item.number}</Text>
+            </View>
+          )}
+          {item.is_ficticio && <Badge text="Muestra" color={colors.warning} />}
+        </View>
       </View>
-      {item.team && <Text style={styles.cardDesc}>{item.team}</Text>}
-      {item.is_ficticio && <Text style={styles.ficticioBadge}>Muestra</Text>}
-    </View>
+    </Card>
   );
 
   if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1976d2" />
-      </View>
-    );
+    return <Loading message="Cargando pilotos..." />;
   }
 
   return (
@@ -81,12 +85,17 @@ export default function PilotsScreen() {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
         }
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No hay pilotos disponibles</Text>
+          <EmptyState title="Sin pilotos" message="No hay pilotos disponibles" icon="🏎️" />
         }
       />
     </View>
@@ -96,53 +105,48 @@ export default function PilotsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: colors.background,
   },
   list: {
-    padding: 16,
+    padding: spacing.lg,
   },
   card: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    elevation: 2,
+    marginBottom: spacing.sm,
   },
-  cardHeader: {
+  cardRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+  cardInfo: {
+    flex: 1,
   },
-  number: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1976d2',
+  cardTitle: {
+    fontSize: typography.lg,
+    fontWeight: typography.semibold,
+    color: colors.text,
   },
   cardDesc: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
+    fontSize: typography.sm,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
-  ficticioBadge: {
-    fontSize: 12,
-    color: '#ff9800',
-    marginTop: 4,
-    fontWeight: '500',
+  rightSection: {
+    alignItems: 'flex-end',
+    gap: spacing.xs,
   },
-  emptyText: {
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 40,
-    fontSize: 16,
+  numberBadge: {
+    backgroundColor: colors.primary + '30',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  numberText: {
+    color: colors.primaryLight,
+    fontSize: typography.md,
+    fontWeight: typography.bold,
+    fontFamily: typography.mono,
   },
 });

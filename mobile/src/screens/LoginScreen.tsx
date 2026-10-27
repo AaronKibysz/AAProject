@@ -1,19 +1,21 @@
-// Pantalla de login
-// Permite al usuario iniciar sesión con email y contraseña
+// Pantalla de login con diseño racing
 
 import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { colors, typography, spacing, borderRadius } from '../theme';
+import { Button, Card } from '../components';
 import { useAuth } from '../context/AuthContext';
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,6 +30,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email, password);
+      navigation.getParent()?.navigate('MainTabs');
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Error al iniciar sesión';
       Alert.alert('Error', message);
@@ -37,16 +40,21 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <View style={styles.header}>
+        <Text style={styles.logo}>🏁</Text>
         <Text style={styles.title}>Automovilismo</Text>
         <Text style={styles.subtitle}>Iniciar Sesión</Text>
       </View>
 
-      <View style={styles.form}>
+      <Card style={styles.form}>
         <TextInput
           style={styles.input}
           placeholder="Email"
+          placeholderTextColor={colors.textMuted}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -55,74 +63,74 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Contraseña"
+          placeholderTextColor={colors.textMuted}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
 
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
+        <Button
+          title="Iniciar Sesión"
           onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.buttonText}>Iniciar Sesión</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </View>
+          loading={loading}
+          size="lg"
+          style={styles.button}
+        />
+
+        <Button
+          title="¿No tienes cuenta? Regístrate"
+          onPress={() => navigation.navigate('Register')}
+          variant="ghost"
+          size="md"
+          style={styles.linkButton}
+        />
+      </Card>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
     justifyContent: 'center',
-    padding: 20,
+    padding: spacing.lg,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: spacing.xxl,
+  },
+  logo: {
+    fontSize: 64,
+    marginBottom: spacing.md,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1976d2',
+    fontSize: typography.xxxl,
+    fontWeight: typography.black,
+    color: colors.text,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 8,
+    fontSize: typography.lg,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
   form: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 12,
-    elevation: 3,
+    padding: spacing.xl,
   },
   input: {
+    backgroundColor: colors.surfaceLight,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    fontSize: typography.md,
+    color: colors.text,
   },
   button: {
-    backgroundColor: '#1976d2',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
+    marginBottom: spacing.md,
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+  linkButton: {
+    marginTop: spacing.sm,
   },
 });

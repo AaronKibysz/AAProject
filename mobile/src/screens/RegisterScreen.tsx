@@ -1,17 +1,19 @@
-// Pantalla de registro
-// Permite al usuario crear una nueva cuenta
+// Pantalla de registro con diseño racing
 
 import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   Alert,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { colors, typography, spacing, borderRadius } from '../theme';
+import { Button, Card } from '../components';
 import { useAuth } from '../context/AuthContext';
 
 export default function RegisterScreen({ navigation }: any) {
@@ -36,6 +38,7 @@ export default function RegisterScreen({ navigation }: any) {
         password,
         full_name: fullName || undefined,
       });
+      navigation.getParent()?.navigate('MainTabs');
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Error al registrarse';
       Alert.alert('Error', message);
@@ -45,123 +48,117 @@ export default function RegisterScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Automovilismo</Text>
-        <Text style={styles.subtitle}>Crear Cuenta</Text>
-      </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={styles.logo}>🏁</Text>
+          <Text style={styles.title}>Automovilismo</Text>
+          <Text style={styles.subtitle}>Crear Cuenta</Text>
+        </View>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email *"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Nombre de usuario *"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña *"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Nombre completo (opcional)"
-          value={fullName}
-          onChangeText={setFullName}
-        />
+        <Card style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="Email *"
+            placeholderTextColor={colors.textMuted}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre de usuario *"
+            placeholderTextColor={colors.textMuted}
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña *"
+            placeholderTextColor={colors.textMuted}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre completo (opcional)"
+            placeholderTextColor={colors.textMuted}
+            value={fullName}
+            onChangeText={setFullName}
+          />
 
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleRegister}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.buttonText}>Registrarse</Text>
-          )}
-        </TouchableOpacity>
+          <Button
+            title="Registrarse"
+            onPress={handleRegister}
+            loading={loading}
+            size="lg"
+            style={styles.button}
+          />
 
-        <TouchableOpacity
-          style={styles.linkButton}
-          onPress={() => navigation.navigate('Login')}
-        >
-          <Text style={styles.linkText}>¿Ya tienes cuenta? Inicia sesión</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <Button
+            title="¿Ya tienes cuenta? Inicia sesión"
+            onPress={() => navigation.navigate('Login')}
+            variant="ghost"
+            size="md"
+            style={styles.linkButton}
+          />
+        </Card>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
-  content: {
+  scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: spacing.lg,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: spacing.xxl,
+  },
+  logo: {
+    fontSize: 64,
+    marginBottom: spacing.md,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1976d2',
+    fontSize: typography.xxxl,
+    fontWeight: typography.black,
+    color: colors.text,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 8,
+    fontSize: typography.lg,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
   form: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 12,
-    elevation: 3,
+    padding: spacing.xl,
   },
   input: {
+    backgroundColor: colors.surfaceLight,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    fontSize: typography.md,
+    color: colors.text,
   },
   button: {
-    backgroundColor: '#1976d2',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    marginBottom: spacing.md,
   },
   linkButton: {
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#1976d2',
-    fontSize: 14,
+    marginTop: spacing.sm,
   },
 });
