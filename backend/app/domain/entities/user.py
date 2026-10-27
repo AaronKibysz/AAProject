@@ -41,6 +41,8 @@ class User(Base):
     # --- Relaciones ---
     
     favorites = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
+    refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
+    refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
     
     # --- Propiedades de negocio (lógica pura, sin dependencia de BD) ---
     

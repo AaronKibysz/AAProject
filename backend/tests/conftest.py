@@ -22,7 +22,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.infrastructure.database import Base, set_test_session_factory
+from app.infrastructure.database import Base, set_test_session
 from app.main import create_app
 
 # ============================================================
@@ -65,19 +65,23 @@ def setup_test_db():
     Configurar base de datos de test para cada test.
     
     Crea todas las tablas en SQLite en memoria y configura
-    set_test_session_factory para que los repositorios usen SQLite.
+    set_test_session para que los repositorios usen SQLite.
     """
     # Crear todas las tablas
     Base.metadata.create_all(bind=test_engine)
     
-    # Configurar factory de sesión para tests
-    set_test_session_factory(lambda: TestSessionLocal())
+    # Crear una sesión compartida para todos los repositorios
+    session = TestSessionLocal()
+    
+    # Configurar sesión compartida para tests
+    set_test_session(session)
     
     yield
     
     # Limpiar después del test
+    session.close()
     Base.metadata.drop_all(bind=test_engine)
-    set_test_session_factory(None)
+    set_test_session(None)
 
 
 @pytest.fixture(scope="function")

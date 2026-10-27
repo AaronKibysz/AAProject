@@ -32,22 +32,29 @@ El repositorio ha sido adaptado de Java + Spring Boot a Python + FastAPI. Estruc
 - Datos en PostgreSQL: 3 categories (2 oficial, 1 ficticio), 3 pilots (2 oficial, 1 ficticio), 3 circuits (2 oficial, 1 ficticio), 4 seasons (3 oficial, 1 ficticio), 5 results, 6 sessions, users y favorites vacías (listas para usar)
 - Endpoints API implementados y funcionando con datos reales:
   - `GET /api/v1/health` - Status 200
-  - `GET/POST/PUT /api/v1/categories` - CRUD completo + filtro include_ficticio
-  - `GET/POST/PUT /api/v1/pilots` - CRUD completo + filtro include_ficticio
-  - `GET/POST/PUT /api/v1/circuits` - CRUD completo + filtro include_ficticio
-  - `GET/POST/PUT /api/v1/seasons` - CRUD completo + filtro include_ficticio/is_active
-  - `GET/POST/PUT /api/v1/results` - CRUD completo + filtros pilot_id/circuit_id/season_id
-  - `GET/POST/PUT /api/v1/sessions` - CRUD completo + filtros circuit_id/season_id/session_type
+  - `GET/POST/PUT /api/v1/categories` - CRUD completo + filtro include_ficticio + paginación
+  - `GET/POST/PUT /api/v1/pilots` - CRUD completo + filtro include_ficticio + paginación
+  - `GET/POST/PUT /api/v1/circuits` - CRUD completo + filtro include_ficticio + paginación
+  - `GET/POST/PUT /api/v1/seasons` - CRUD completo + filtro include_ficticio/is_active + paginación
+  - `GET/POST/PUT /api/v1/results` - CRUD completo + filtros pilot_id/circuit_id/season_id + paginación
+  - `GET/POST/PUT /api/v1/sessions` - CRUD completo + filtros circuit_id/season_id/session_type + paginación
+  - `GET /api/v1/search?q=...` - Búsqueda global en categorías, pilotos, circuitos, temporadas
   - `GET /api/v1/pilots/{id}/results` - Resultados por piloto (endpoint cruzado)
   - `GET /api/v1/circuits/{id}/schedule` - Cronograma por circuito (endpoint cruzado)
   - `GET /api/v1/categories/{id}/seasons` - Temporadas por categoría (endpoint cruzado)
-  - `POST /api/v1/auth/register` - Registro de usuario con hash de contraseña (bcrypt)
+  - `POST /api/v1/auth/register` - Registro de usuario con hash bcrypt
   - `POST /api/v1/auth/login` - Autenticación con token JWT (HS256, expirable)
   - `POST /api/v1/favorites` - Crear favorito (requiere auth JWT)
   - `GET /api/v1/favorites` - Listar favoritos del usuario (requiere auth JWT)
   - `DELETE /api/v1/favorites/{id}` - Eliminar favorito (requiere auth JWT)
-- Todos los endpoints probados con PostgreSQL real (Docker) - Status 200/201/409/401/422 correctos
-- Dependencias de seguridad agregadas: bcrypt, python-jose[cryptography], python-dotenv
+- Tests automatizados con pytest (54 tests):
+  - test_auth.py: Registro, login, validaciones
+  - test_categories.py: CRUD, paginación, filtros ficticio
+  - test_favorites.py: CRUD de favoritos, autenticación requerida
+  - test_pagination.py: Paginación en todos los endpoints de listado
+  - test_search.py: Búsqueda global en categorías, pilotos, circuitos, temporadas
+- Tests automatizados con pytest (54 tests) - 100% pasando
+- Dependencias de seguridad agregadas: bcrypt, python-jose[cryptography], python-dotenv, pytest-asyncio
 
 ### Pr�ximos pasos pendientes
 
@@ -93,15 +100,19 @@ El repositorio ha sido adaptado de Java + Spring Boot a Python + FastAPI. Estruc
 - SECRET_KEY configurable via variable de entorno (no hardcodear en producción)
 - Endpoints de favoritos protegidos con autenticación JWT
 - Favoritos vinculados a usuario con índice compuesto único (evita duplicados)
+- Rate limiting en endpoints de autenticación:
+  - Login: máximo 5 intentos por IP cada 5 minutos
+  - Registro: máximo 5 intentos por IP cada 5 minutos
+  - Respuesta 429 (Too Many Requests) cuando se excede el límite
 
 ## Configuraci�n actual verificada
 
 - `docker compose up -d`: levanta db + api simultaneamente (verificado - ambos contenedores healthy)
 - `uvicorn app.main:app --reload --port 8080`: levanta API localmente
 - `alembic upgrade head`: aplica migraciones a la BD (✅ completado - v1__initial + 6c611fb887fa + 8f3a2b1c4d5e)
-- `python -m pytest`: ejecuta 45 tests (✅ todos pasando)
+- `python -m pytest`: ejecuta 54 tests (✅ todos pasando)
 - Endpoints: todos los de categories, pilots, circuits, seasons, results, sessions, auth, favorites implementados y probados con BD real
 
 ## �ltima actualizaci�n
 
-27 de octubre de 2026 - Opción C completada: autenticación JWT (registro/login), favoritos de usuario, y tablas users/favorites, tests automatizados (45 tests) y paginación en todos los endpoints de listado. Todos los endpoints probados con PostgreSQL real a trav�s de Docker. Arquitectura de 4 capas finalizada con 8 tablas.
+27 de octubre de 2026 - Opción C completada: autenticación JWT (registro/login con rate limiting), favoritos de usuario, tablas users/favorites, tests automatizados (54 tests), paginación en todos los endpoints de listado y búsqueda global (GET /api/v1/search). Todos los endpoints probados con PostgreSQL real a través de Docker. Arquitectura de 4 capas finalizada con 8 tablas.�s de Docker. Arquitectura de 4 capas finalizada con 8 tablas.

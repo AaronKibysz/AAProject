@@ -3,6 +3,7 @@
 # Las capas application e interface dependen de estas interfaces,
 # no de queries SQL directamente.
 
+from datetime import datetime
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session as DBSession
 
@@ -15,6 +16,8 @@ from app.domain.entities.result import Result  # Import concreto para Result
 from app.domain.entities.session import Session as SessionEntity  # Entidad SQLAlchemy Session
 from app.domain.entities.user import User  # Import concreto para User
 from app.domain.entities.favorite import Favorite  # Import concreto para Favorite
+from app.domain.entities.refresh_token import RefreshToken  # Import concreto para RefreshToken
+from app.domain.entities.refresh_token import RefreshToken  # Import concreto para RefreshToken
 
 
 # ============================================================
@@ -105,6 +108,37 @@ class SqlAlchemyRepository:
         
         return items, total
     
+    async def search(
+        self,
+        query: str,
+        search_field: str = "name",
+        **filters
+    ) -> list[Base]:
+        """Buscar entidades por coincidencia parcial (ILIKE) en un campo.
+        
+        Args:
+            query: Término de búsqueda.
+            search_field: Nombre del campo en el cual buscar (default: "name").
+            **filters: Filtros adicionales clave-valor.
+            
+        Returns:
+            List[Base]: Lista de entidades que coinciden con la búsqueda.
+        """
+        if not hasattr(self.model, search_field):
+            raise AttributeError(f"Model {self.model.__name__} has no attribute '{search_field}'")
+        
+        statement = select(self.model).where(
+            getattr(self.model, search_field).ilike(f"%{query}%")
+        )
+        for key, value in filters.items():
+            if hasattr(self.model, key):
+                statement = statement.where(getattr(self.model, key) == value)
+        
+        result = self.session.execute(statement)
+        items = result.scalars().all()
+        
+        return items
+    
     # --- Creación ---
     
     async def create(self, entity: Base) -> Base:
@@ -133,8 +167,8 @@ class SqlAlchemyRepository:
         Returns:
             Entidad actualizada con valores actuales de BD
         """
+        self.session.flush()
         self.session.commit()
-        self.session.refresh(entity)
         return entity
     
     # --- Eliminación ---
@@ -587,3 +621,141 @@ def get_favorite_repository() -> SqlAlchemyFavoriteRepository:
         SqlAlchemyFavoriteRepository listo para usar
     """
     return SqlAlchemyFavoriteRepository(get_session_local())
+
+
+class SqlAlchemyRefreshTokenRepository(SqlAlchemyRepository):
+    """Repositorio específico para la entidad RefreshToken.
+    
+    Métodos adicionales a los CRUD básicos:
+    - get_by_token: buscar refresh token por hash
+    - get_by_user: obtener todos los refresh tokens de un usuario
+    - revoke_by_user: revocar todos los refresh tokens de un usuario
+    - revoke_all_expired: revocar todos los refresh tokens expirados
+    """
+    
+    def __init__(self, session: DBSession):
+        """Inicializar repositorio RefreshToken."""
+        super().__init__(session, RefreshToken)
+    
+    async def get_by_token(
+        self,
+        token_hash: str,
+    ) -> RefreshToken | None:
+        """Buscar refresh token por hash.
+        
+        Args:
+            token_hash: Hash del refresh token.
+            
+        Returns:
+            RefreshToken encontrado o None.
+        """
+        # Usar SQL directo para evitar problemas de cache de sesión
+        from sqlalchemy import text
+        from datetime import datetime
+        result = self.session.execute(
+            text("SELECT id, user_id, token_hash, expires_at, is_revoked, created_at FROM refresh_tokens WHERE token_hash = :token_hash"),
+            {"token_hash": token_hash}
+        )
+        row = result.fetchone()
+        if not row:
+            return None
+        
+        # Reconstruir la entidad desde los datos de la BD
+        token = RefreshToken()
+        token.id = row[0]
+        token.user_id = row[1]
+        token.token_hash = row[2]
+        
+        # Parsear expires_at si es string
+        expires_at = row[3]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        token.expires_at = expires_at
+        
+        token.is_revoked = row[4]
+        
+        # Parsear created_at si es string
+        created_at = row[5]
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at)
+        token.created_at = created_at
+        
+        return token
+    
+    async def get_by_user(
+        self,
+        user_id: int,
+    ) -> list[RefreshToken]:
+        """Obtener todos los refresh tokens de un usuario.
+        
+        Args:
+            user_id: ID del usuario.
+            
+        Returns:
+            List[RefreshToken]: Refresh tokens del usuario.
+        """
+        return await self.get_all(user_id=user_id)
+    
+    async def revoke_by_user(
+        self,
+        user_id: int,
+    ) -> int:
+        """Revocar todos los refresh tokens de un usuario.
+        
+        Args:
+            user_id: ID del usuario.
+            
+        Returns:
+            int: Número de tokens revocados.
+        """
+        statement = select(RefreshToken).where(RefreshToken.user_id == user_id)
+        result = self.session.execute(statement)
+        tokens = result.scalars().all()
+        
+        count = 0
+        for token in tokens:
+            token.is_revoked = True
+            count += 1
+        
+        if count > 0:
+            self.session.commit()
+        
+        return count
+    
+    async def revoke_expired(self) -> int:
+        """Revocar todos los refresh tokens expirados.
+        
+        Returns:
+            int: Número de tokens revocados.
+        """
+        statement = select(RefreshToken).where(
+            RefreshToken.expires_at < datetime.now(timezone.utc),
+            RefreshToken.is_revoked == False,
+        )
+        result = self.session.execute(statement)
+        tokens = result.scalars().all()
+        
+        count = 0
+        for token in tokens:
+            token.is_revoked = True
+            count += 1
+        
+        if count > 0:
+            self.session.commit()
+        
+        return count
+
+
+# Instancia helper para crear repositorios por tipo
+# Patrón factory function para inyección de dependencias
+
+
+def get_refresh_token_repository() -> SqlAlchemyRefreshTokenRepository:
+    """Factory function para crear SqlAlchemyRefreshTokenRepository.
+    
+    Crea una sesión DB interna y retorna el repositorio RefreshToken.
+    
+    Returns:
+        SqlAlchemyRefreshTokenRepository listo para usar
+    """
+    return SqlAlchemyRefreshTokenRepository(get_session_local())

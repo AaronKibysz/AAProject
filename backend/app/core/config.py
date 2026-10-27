@@ -42,6 +42,12 @@ class Settings(BaseSettings):
         ge=5,
         description="Tiempo de expiración del token de acceso en minutos",
     )
+    REFRESH_TOKEN_EXPIRE_DAYS: int = Field(
+        default=7,
+        ge=1,
+        le=30,
+        description="Tiempo de expiración del refresh token en días",
+    )
 
     # --- Configuración de la Aplicación ---
     

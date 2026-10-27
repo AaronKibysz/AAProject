@@ -3,6 +3,7 @@
 # la interacción entre el dominio y la infraestructura (repositorios).
 
 from typing import List, Optional
+from datetime import timedelta, timezone, datetime
 
 from app.infrastructure.database import get_db as get_db_session, SessionLocal
 from app.domain.entities.category import Category
@@ -13,6 +14,7 @@ from app.domain.entities.result import Result as ResultEntity
 from app.domain.entities.session import Session as SessionEntity
 from app.domain.entities.user import User
 from app.domain.entities.favorite import Favorite
+from app.domain.entities.refresh_token import RefreshToken
 from app.infrastructure.repositories import (
     SqlAlchemyCategoryRepository,
     SqlAlchemyPilotRepository,
@@ -22,9 +24,12 @@ from app.infrastructure.repositories import (
     SqlAlchemySessionRepository,
     SqlAlchemyUserRepository,
     SqlAlchemyFavoriteRepository,
+    SqlAlchemyRefreshTokenRepository,
 )
 from app.core.security import hash_password, verify_password, create_access_token
+from app.core.config import settings
 from app.core.exceptions import NotFound, AlreadyExists, ValidationError
+from app.schemas.schemas import SearchResult
 
 
 # ============================================================
@@ -1648,3 +1653,357 @@ class DeleteFavoriteUseCase:
         deleted = await self.favorite_repository.delete(favorite_id)
         
         return deleted
+
+
+# ============================================================
+# Caso de uso: Búsqueda global
+# ============================================================
+
+class SearchUseCase:
+    """Caso de uso para búsqueda global en todas las entidades.
+    
+    Busca por coincidencia parcial (ILIKE) en el nombre de:
+    - Categorías
+    - Pilotos
+    - Circuitos
+    - Temporadas
+    
+    Dependencies:
+    - category_repository: SqlAlchemyCategoryRepository
+    - pilot_repository: SqlAlchemyPilotRepository
+    - circuit_repository: SqlAlchemyCircuitRepository
+    - season_repository: SqlAlchemySeasonRepository
+    """
+    
+    def __init__(
+        self,
+        category_repository: SqlAlchemyCategoryRepository,
+        pilot_repository: SqlAlchemyPilotRepository,
+        circuit_repository: SqlAlchemyCircuitRepository,
+        season_repository: SqlAlchemySeasonRepository,
+    ):
+        self.category_repository = category_repository
+        self.pilot_repository = pilot_repository
+        self.circuit_repository = circuit_repository
+        self.season_repository = season_repository
+    
+    async def execute(
+        self,
+        query: str,
+        limit_per_type: int = 10
+    ) -> list[SearchResult]:
+        """Ejecutar búsqueda global en todas las entidades.
+        
+        Args:
+            query: Término de búsqueda.
+            limit_per_type: Máximo de resultados por tipo de entidad.
+            
+        Returns:
+            List[SearchResult]: Lista de resultados de búsqueda.
+        """
+        results = []
+        
+        # Buscar categorías
+        categories = await self.category_repository.search(query=query)
+        for cat in categories[:limit_per_type]:
+            results.append(SearchResult(
+                resource_type="category",
+                resource_id=cat.id,
+                name=cat.name,
+                description=cat.description,
+                is_ficticio=cat.is_ficticio,
+            ))
+        
+        # Buscar pilotos
+        pilots = await self.pilot_repository.search(query=query)
+        for pilot in pilots[:limit_per_type]:
+            results.append(SearchResult(
+                resource_type="pilot",
+                resource_id=pilot.id,
+                name=pilot.name,
+                description=pilot.team,
+                is_ficticio=pilot.is_ficticio,
+            ))
+        
+        # Buscar circuitos
+        circuits = await self.circuit_repository.search(query=query)
+        for circuit in circuits[:limit_per_type]:
+            results.append(SearchResult(
+                resource_type="circuit",
+                resource_id=circuit.id,
+                name=circuit.name,
+                description=circuit.location,
+                is_ficticio=circuit.is_ficticio,
+            ))
+        
+        # Buscar temporadas
+        seasons = await self.season_repository.search(query=query, search_field="year")
+        for season in seasons[:limit_per_type]:
+            results.append(SearchResult(
+                resource_type="season",
+                resource_id=season.id,
+                name=str(season.year),
+                description=f"Temporada {season.year} - Categoría ID {season.category_id}",
+                is_ficticio=season.is_ficticio,
+            ))
+        
+        return results
+
+
+# ============================================================
+# Caso de uso: Crear refresh token
+# ============================================================
+
+class CreateRefreshTokenUseCase:
+    """Caso de uso para crear un refresh token después de un login exitoso."""
+    
+    def __init__(
+        self,
+        refresh_token_repository: SqlAlchemyRefreshTokenRepository,
+        user_repository: SqlAlchemyUserRepository,
+    ):
+        self.refresh_token_repository = refresh_token_repository
+        self.user_repository = user_repository
+    
+    async def execute(
+        self,
+        user_id: int,
+        expires_delta: Optional[timedelta] = None,
+    ) -> tuple[str, datetime]:
+        """Ejecutar creación de refresh token.
+        
+        Args:
+            user_id: ID del usuario.
+            expires_delta: Tiempo de expiración personalizado.
+            
+        Returns:
+            tuple[str, datetime]: Tupla con el refresh token y su fecha de expiración.
+            
+        Raises:
+            NotFound: Si el usuario no existe.
+        """
+        from app.core.security import create_refresh_token as create_refresh_token_jwt
+        from datetime import timedelta, timezone, datetime
+        
+        user = await self.user_repository.get_by_id(user_id)
+        if not user:
+            raise NotFound("Usuario", user_id)
+        
+        if expires_delta is None:
+            from app.core.config import settings
+            expires_delta = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        
+        expires_at = datetime.now(timezone.utc) + expires_delta
+        
+        # Crear el refresh token JWT
+        refresh_token = create_refresh_token_jwt(
+            subject=user_id,
+            expires_delta=expires_delta,
+        )
+        
+        # Hashear el token para almacenarlo en la BD (SHA-256 determinístico)
+        from app.core.security import hash_token
+        token_hash = hash_token(refresh_token)
+        
+        # Crear la entidad en la BD
+        refresh_token_entity = RefreshToken(
+            user_id=user_id,
+            token_hash=token_hash,
+            expires_at=expires_at,
+        )
+        
+        created = await self.refresh_token_repository.create(refresh_token_entity)
+        
+        return refresh_token, expires_at
+
+
+# ============================================================
+# Caso de uso: Renovar access token con refresh token
+# ============================================================
+
+class RefreshAccessTokenUseCase:
+    """Caso de uso para renovar un access token usando un refresh token.
+    
+    Valida el refresh token, verifica que no esté revocado ni expirado,
+    y genera un nuevo access token.
+    """
+    
+    def __init__(
+        self,
+        refresh_token_repository: SqlAlchemyRefreshTokenRepository,
+        user_repository: SqlAlchemyUserRepository,
+    ):
+        self.refresh_token_repository = refresh_token_repository
+        self.user_repository = user_repository
+    
+    async def execute(
+        self,
+        refresh_token: str,
+    ) -> tuple[str, str, datetime]:
+        """Ejecutar renovación de access token.
+        
+        Args:
+            refresh_token: Refresh token JWT proporcionado por el cliente.
+            
+        Returns:
+            tuple[str, str, datetime]: Tupla con (nuevo access token, refresh token, fecha de expiración).
+            
+        Raises:
+            ValidationError: Si el refresh token es inválido, expirado o revocado.
+            NotFound: Si el usuario no existe.
+        """
+        from app.core.security import decode_token, extract_user_id_from_token
+        
+        # Decodificar el refresh token
+        payload = decode_token(refresh_token)
+        if payload is None:
+            raise ValidationError("Refresh token inválido o expirado")
+        
+        # Verificar que sea un refresh token
+        if payload.get("type") != "refresh":
+            raise ValidationError("El token no es un refresh token válido")
+        
+        user_id = extract_user_id_from_token(refresh_token)
+        if user_id is None:
+            raise ValidationError("Refresh token inválido")
+        
+        # Verificar que el usuario exista
+        user = await self.user_repository.get_by_id(user_id)
+        if not user:
+            raise NotFound("Usuario", user_id)
+        
+        if not user.is_active:
+            raise ValidationError("El usuario está inactivo")
+        
+        # Verificar que el refresh token exista en la BD y no esté revocado
+        from app.core.security import hash_token
+        # Invalidar cache de sesión para ver cambios commiteados
+        self.refresh_token_repository.session.expire_all()
+        # Buscar por token hash (SHA-256 determinístico)
+        token_entity = await self.refresh_token_repository.get_by_token(
+            token_hash=hash_token(refresh_token)
+        )
+        
+        if not token_entity:
+            raise ValidationError("Refresh token no encontrado en la base de datos")
+        
+        if not token_entity.is_valid:
+            if token_entity.is_revoked:
+                raise ValidationError("El refresh token ha sido revocado")
+            if token_entity.is_expired:
+                raise ValidationError("El refresh token ha expirado")
+        
+        # Generar nuevo access token
+        from app.core.security import create_access_token
+        new_access_token = create_access_token(subject=user_id)
+        
+        # Generar nuevo refresh token (rotación de tokens)
+        new_refresh_token, new_expires_at = await self._create_new_refresh_token(user_id)
+        
+        # Revocar el refresh token anterior (rotación)
+        token_entity.is_revoked = True
+        await self.refresh_token_repository.update(token_entity)
+        
+        return new_access_token, new_refresh_token, new_expires_at
+    
+    async def _create_new_refresh_token(
+        self,
+        user_id: int,
+    ) -> tuple[str, datetime]:
+        """Crear un nuevo refresh token para el usuario."""
+        from app.core.security import create_refresh_token as create_refresh_token_jwt, hash_token
+        from datetime import timedelta, timezone, datetime
+        
+        from app.core.config import settings
+        expires_delta = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        expires_at = datetime.now(timezone.utc) + expires_delta
+        
+        refresh_token = create_refresh_token_jwt(
+            subject=user_id,
+            expires_delta=expires_delta,
+        )
+        
+        token_hash = hash_token(refresh_token)
+        
+        refresh_token_entity = RefreshToken(
+            user_id=user_id,
+            token_hash=token_hash,
+            expires_at=expires_at,
+        )
+        
+        await self.refresh_token_repository.create(refresh_token_entity)
+        
+        return refresh_token, expires_at
+
+
+# ============================================================
+# Caso de uso: Revocar refresh token (logout)
+# ============================================================
+
+class RevokeRefreshTokenUseCase:
+    """Caso de uso para revocar un refresh token (logout de un dispositivo)."""
+    
+    def __init__(
+        self,
+        refresh_token_repository: SqlAlchemyRefreshTokenRepository,
+    ):
+        self.refresh_token_repository = refresh_token_repository
+    
+    async def execute(
+        self,
+        refresh_token: str,
+    ) -> bool:
+        """Ejecutar revocación de refresh token.
+        
+        Args:
+            refresh_token: Refresh token JWT a revocar.
+            
+        Returns:
+            bool: True si se revocó correctamente, False si no existía.
+        """
+        from app.core.security import hash_token
+        
+        token_entity = await self.refresh_token_repository.get_by_token(
+            token_hash=hash_token(refresh_token)
+        )
+        
+        if not token_entity:
+            return False
+        
+        # Usar SQL directo para revocar el token
+        from sqlalchemy import text
+        self.refresh_token_repository.session.execute(
+            text("UPDATE refresh_tokens SET is_revoked = true WHERE token_hash = :token_hash"),
+            {"token_hash": hash_token(refresh_token)}
+        )
+        self.refresh_token_repository.session.commit()
+        
+        return True
+
+
+# ============================================================
+# Caso de uso: Revocar todos los refresh tokens (logout global)
+# ============================================================
+
+class RevokeAllRefreshTokensUseCase:
+    """Caso de uso para revocar todos los refresh tokens de un usuario (logout de todos los dispositivos)."""
+    
+    def __init__(
+        self,
+        refresh_token_repository: SqlAlchemyRefreshTokenRepository,
+    ):
+        self.refresh_token_repository = refresh_token_repository
+    
+    async def execute(
+        self,
+        user_id: int,
+    ) -> int:
+        """Ejecutar revocación de todos los refresh tokens.
+        
+        Args:
+            user_id: ID del usuario.
+            
+        Returns:
+            int: Número de tokens revocados.
+        """
+        return await self.refresh_token_repository.revoke_by_user(user_id=user_id)

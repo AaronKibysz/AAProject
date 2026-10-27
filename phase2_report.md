@@ -48,8 +48,8 @@
 | `/api/v1/sessions/{id}` | GET | ✅ Alcanzable | Obtener por ID |
 | `/api/v1/sessions` | POST | ✅ Alcanzable | Crear sesión |
 | `/api/v1/sessions/{id}` | PUT | ✅ Alcanzable | Actualizar sesión |
-| `/api/v1/auth/register` | POST | ✅ 201/409 | Registrar usuario (hash bcrypt) |
-| `/api/v1/auth/login` | POST | ✅ 200/422 | Autenticar y obtener token JWT |
+| `/api/v1/auth/register` | POST | ✅ 201/409/429 | Registrar usuario (hash bcrypt) + rate limiting (5 intentos/5 min) |
+| `/api/v1/auth/login` | POST | ✅ 200/422/429 | Autenticar y obtener token JWT + rate limiting (5 intentos/5 min) |
 | `/api/v1/favorites` | POST | ✅ 201/409/401 | Crear favorito (requiere auth) |
 | `/api/v1/favorites` | GET | ✅ 200/401 | Listar favoritos del usuario (requiere auth) |
 | `/api/v1/favorites/{id}` | DELETE | ✅ 204/401/404 | Eliminar favorito (requiere auth) |
@@ -57,7 +57,7 @@
 | `/api/v1/circuits/{id}/schedule` | GET | ✅ Alcanzable | Cronograma por circuito |
 | `/api/v1/categories/{id}/seasons` | GET | ✅ Alcanzable | Temporadas por categoría |
 
-**Nota:** Todos los endpoints están alcanzables y han sido probados con PostgreSQL real mediante Docker Compose. Los status codes son correctos: 200 para GET exitoso, 201 para POST creado, 409 para conflicto de duplicados, 404 para no encontrado, 422 para validación inválida, 401 para no autenticado.
+**Nota:** Todos los endpoints están alcanzables y han sido probados con PostgreSQL real mediante Docker Compose. Los status codes son correctos: 200 para GET exitoso, 201 para POST creado, 409 para conflicto de duplicados, 404 para no encontrado, 422 para validación inválida, 401 para no autenticado, 429 para rate limiting excedido.
 
 ### Problemas Detectados y Solucionados
 

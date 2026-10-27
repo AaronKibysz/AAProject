@@ -653,15 +653,24 @@ class LoginRequest(BaseModel):
 
 
 class Token(BaseModel):
-    """Schema de respuesta con token de acceso JWT."""
+    """Schema de respuesta con token de acceso JWT y refresh token."""
     access_token: str
     token_type: str = "bearer"
     expires_in: int  # segundos hasta expiración
+    refresh_token: Optional[str] = None
+    refresh_expires_in: Optional[int] = None  # segundos hasta expiración del refresh token
 
 
 class TokenData(BaseModel):
     """Datos extraídos de un token JWT válido."""
     user_id: Optional[int] = None
+
+
+class RefreshTokenRequest(BaseModel):
+    """Schema de entrada para renovar o revocar un refresh token."""
+    refresh_token: str = Field(
+        description="Refresh token JWT a usar para renovar o revocar"
+    )
 
 
 # ============================================================

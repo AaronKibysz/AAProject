@@ -49,26 +49,26 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Variable para inyecciÃ³n de sesiÃ³n de test (SQLite en memoria)
 # Se usa en conftest.py para tests sin depender de PostgreSQL
-_test_session_factory = None
+_test_session = None
 
 
-def set_test_session_factory(factory):
-    """Configurar una fÃ¡brica de sesiones para tests.
+def set_test_session(session):
+    """Configurar una sesiÃ³n compartida para tests.
     
     Permite sobrescribir SessionLocal con una sesiÃ³n de SQLite en memoria
-    para ejecutar tests sin depender de PostgreSQL.
+    compartida para ejecutar tests sin depender de PostgreSQL.
     
     Args:
-        factory: Callable que retorna una sesiÃ³n SQLAlchemy.
+        session: SesiÃ³n SQLAlchemy compartida para tests.
     """
-    global _test_session_factory
-    _test_session_factory = factory
+    global _test_session
+    _test_session = session
 
 
 def get_session_local():
     """Obtener SessionLocal, usando la de test si estÃ¡ configurada."""
-    if _test_session_factory is not None:
-        return _test_session_factory()
+    if _test_session is not None:
+        return _test_session
     return SessionLocal()
 
 

@@ -16,6 +16,7 @@ from app.infrastructure.repositories import (
     SqlAlchemySessionRepository,
     SqlAlchemyUserRepository,
     SqlAlchemyFavoriteRepository,
+    SqlAlchemyRefreshTokenRepository,
 )
 from app.application.use_cases import (
     GetCategoriesUseCase,
@@ -48,8 +49,12 @@ from app.application.use_cases import (
     CreateFavoriteUseCase,
     GetFavoritesByUserUseCase,
     DeleteFavoriteUseCase,
+    CreateRefreshTokenUseCase,
+    RefreshAccessTokenUseCase,
+    RevokeRefreshTokenUseCase,
+    RevokeAllRefreshTokensUseCase,
 )
-from app.core.security import extract_user_id_from_token
+from app.core.security import extract_user_id_from_token, create_refresh_token
 
 
 # ============================================================
@@ -495,3 +500,97 @@ def get_optional_int_param(
     Placeholder para filtros pagination, pagination, etc.
     """
     return value
+
+
+# ============================================================
+# Dependencias de repositorios - RefreshToken
+# ============================================================
+
+def get_refresh_token_repository() -> SqlAlchemyRefreshTokenRepository:
+    """Factory function para crear SqlAlchemyRefreshTokenRepository.
+    
+    Crea una sesión DB interna y retorna el repositorio RefreshToken.
+    
+    Returns:
+        SqlAlchemyRefreshTokenRepository listo para usar
+    """
+    return SqlAlchemyRefreshTokenRepository(get_session_local())
+
+
+# ============================================================
+# Dependencias de casos de uso - RefreshToken
+# ============================================================
+
+def get_create_refresh_token_use_case(
+    refresh_token_repo: SqlAlchemyRefreshTokenRepository = Depends(get_refresh_token_repository),
+    user_repo: SqlAlchemyUserRepository = Depends(get_user_repository),
+) -> CreateRefreshTokenUseCase:
+    """Inyectar CreateRefreshTokenUseCase con repositorios configurados."""
+    return CreateRefreshTokenUseCase(refresh_token_repo, user_repo)
+
+
+def get_refresh_access_token_use_case(
+    refresh_token_repo: SqlAlchemyRefreshTokenRepository = Depends(get_refresh_token_repository),
+    user_repo: SqlAlchemyUserRepository = Depends(get_user_repository),
+) -> RefreshAccessTokenUseCase:
+    """Inyectar RefreshAccessTokenUseCase con repositorios configurados."""
+    return RefreshAccessTokenUseCase(refresh_token_repo, user_repo)
+
+
+def get_revoke_refresh_token_use_case(
+    refresh_token_repo: SqlAlchemyRefreshTokenRepository = Depends(get_refresh_token_repository),
+) -> RevokeRefreshTokenUseCase:
+    """Inyectar RevokeRefreshTokenUseCase con repositorio configurado."""
+    return RevokeRefreshTokenUseCase(refresh_token_repo)
+
+
+def get_revoke_all_refresh_tokens_use_case(
+    refresh_token_repo: SqlAlchemyRefreshTokenRepository = Depends(get_refresh_token_repository),
+) -> RevokeAllRefreshTokensUseCase:
+    """Inyectar RevokeAllRefreshTokensUseCase con repositorio configurado."""
+    return RevokeAllRefreshTokensUseCase(refresh_token_repo)
+
+
+# ============================================================
+# Dependencias de repositorios - RefreshToken
+# ============================================================
+
+def get_refresh_token_repository() -> SqlAlchemyRefreshTokenRepository:
+    """Factory function para crear SqlAlchemyRefreshTokenRepository.
+    
+    Crea una sesión DB interna y retorna el repositorio RefreshToken.
+    
+    Returns:
+        SqlAlchemyRefreshTokenRepository listo para usar
+    """
+    return SqlAlchemyRefreshTokenRepository(get_session_local())
+
+
+# ============================================================
+# Dependencias de casos de uso - RefreshToken
+# ============================================================
+
+def get_refresh_token_use_case(
+    refresh_token_repo: SqlAlchemyRefreshTokenRepository = Depends(get_refresh_token_repository),
+    user_repo: SqlAlchemyUserRepository = Depends(get_user_repository),
+) -> RefreshTokenUseCase:
+    """Inyectar RefreshTokenUseCase con repositorios configurados."""
+    return RefreshTokenUseCase(refresh_token_repo, user_repo)
+
+
+# ============================================================
+# Dependencia para obtener usuario autenticado desde refresh token
+# ============================================================
+
+def get_user_from_refresh_token(
+    refresh_token: str,
+) -> Optional[int]:
+    """Extraer ID de usuario desde un refresh token.
+    
+    Args:
+        refresh_token: Token de refresco JWT.
+        
+    Returns:
+        Optional[int]: ID del usuario si el token es válido, None en caso contrario.
+    """
+    return extract_user_id_from_token(refresh_token)
