@@ -113,6 +113,11 @@ El repositorio ha sido adaptado de Java + Spring Boot a Python + FastAPI. Estruc
 - `python -m pytest`: ejecuta 54 tests (✅ todos pasando)
 - Endpoints: todos los de categories, pilots, circuits, seasons, results, sessions, auth, favorites implementados y probados con BD real
 
+## Decisiones recientes (sesión actual)
+- Sistema de usuarios/autenticación deshabilitado en mobile para alinearse con el MVP (sin cuentas).
+- Favoritos ahora se guardan localmente en caché (AsyncStorage/SecureStore) mediante `mobile/src/services/favorites.ts`.
+- `AuthContext` simplificado a modo invitado; `ProfileScreen` ya no depende de datos de usuario.
+
 ## �ltima actualizaci�n
 
 27 de octubre de 2026 - Opción C completada: autenticación JWT (registro/login con rate limiting), favoritos de usuario, tablas users/favorites, tests automatizados (54 tests), paginación en todos los endpoints de listado y búsqueda global (GET /api/v1/search). Todos los endpoints probados con PostgreSQL real a través de Docker. Arquitectura de 4 capas finalizada con 8 tablas.�s de Docker. Arquitectura de 4 capas finalizada con 8 tablas.

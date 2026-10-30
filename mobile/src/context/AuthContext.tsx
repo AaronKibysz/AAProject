@@ -1,14 +1,12 @@
-// Contexto de autenticación para la app mobile
-// Maneja login, register, logout y estado del usuario
+// Contexto de autenticación deshabilitado para el MVP
+// El MVP no incluye cuentas de usuario; los favoritos se guardan localmente.
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiService } from '../services/api';
-import { User, Token } from '../types';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface AuthContextType {
-  user: User | null;
+  user: null;
   isLoading: boolean;
-  isAuthenticated: boolean;
+  isAuthenticated: false;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { email: string; username: string; password: string; full_name?: string }) => Promise<void>;
   logout: () => Promise<void>;
@@ -17,61 +15,23 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const disabled = async () => {
+  throw new Error('La autenticación está deshabilitada en esta versión (MVP sin cuentas).');
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const isAuth = await apiService.isAuthenticated();
-      if (isAuth) {
-        const userData = await apiService.getCurrentUser();
-        setUser(userData);
-      }
-    } catch (error) {
-      console.log('Auth check failed:', error);
-      await apiService.clearTokens();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const login = async (email: string, password: string) => {
-    const token: Token = await apiService.login(email, password);
-    const userData = await apiService.getCurrentUser();
-    setUser(userData);
-  };
-
-  const register = async (data: { email: string; username: string; password: string; full_name?: string }) => {
-    await apiService.register(data);
-    // Auto-login después de registro
-    await login(data.email, data.password);
-  };
-
-  const logout = async () => {
-    await apiService.logout();
-    setUser(null);
-  };
-
-  const logoutAll = async () => {
-    await apiService.logoutAll();
-    setUser(null);
-  };
+  const [isLoading] = useState(false);
 
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: null,
         isLoading,
-        isAuthenticated: !!user,
-        login,
-        register,
-        logout,
-        logoutAll,
+        isAuthenticated: false,
+        login: disabled,
+        register: disabled,
+        logout: async () => {},
+        logoutAll: async () => {},
       }}
     >
       {children}
